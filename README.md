@@ -1,13 +1,16 @@
 # YouTube 播放速度增强
 
 ![Userscript](https://img.shields.io/badge/userscript-Tampermonkey%20%2F%20Violentmonkey-00485b)
-![Version](https://img.shields.io/badge/version-1.3.1-blue)
+![Version](https://img.shields.io/badge/version-1.3.2-blue)
 ![YouTube](https://img.shields.io/badge/site-YouTube-red)
 ![License](https://img.shields.io/badge/license-MIT-green)
+[![Greasy Fork](https://img.shields.io/badge/Greasy%20Fork-install-670000)](https://greasyfork.org/scripts/585659)
 
 一个用于 YouTube 的 Tampermonkey / Violentmonkey 用户脚本。
 
 推荐仓库名：`youtube-speed-booster`
+
+安装地址：[Greasy Fork](https://greasyfork.org/scripts/585659)
 
 ## 功能
 
@@ -22,9 +25,15 @@
 ## 安装
 
 1. 浏览器安装 Tampermonkey、Violentmonkey 或兼容用户脚本管理器。
-2. 新建脚本。
-3. 粘贴 `youtube-speed-booster.user.js` 的内容并保存。
+2. 打开 [Greasy Fork 脚本页](https://greasyfork.org/scripts/585659)。
+3. 点击安装脚本。
 4. 打开或刷新 YouTube 视频页面。
+
+直接安装 / 更新 URL：
+
+```text
+https://update.greasyfork.org/scripts/585659/code.user.js
+```
 
 ## 使用
 
@@ -61,6 +70,11 @@ node --check youtube-speed-booster.user.js
 ```
 
 ## 版本记录
+
+### 1.3.2
+
+- README 增加 Greasy Fork 安装 badge 和安装链接。
+- userscript 的 `downloadURL` / `updateURL` 切换为 Greasy Fork 自动更新地址。
 
 ### 1.3.1
 

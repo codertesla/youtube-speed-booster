@@ -2,15 +2,15 @@
 // @name         YouTube 播放速度增强
 // @name:en      YouTube Speed Booster
 // @namespace    https://codex.local/userscripts
-// @version      1.3.1
+// @version      1.3.2
 // @description  解锁 YouTube 2.0x 倍速上限，并把脚本中设置的速度自动保存为所有视频的默认播放速度。
 // @description:en Unlock YouTube playback speeds above 2.0x and save one default speed for every video.
 // @author       codertesla
 // @license      MIT
 // @homepageURL  https://github.com/codertesla/youtube-speed-booster
 // @supportURL   https://github.com/codertesla/youtube-speed-booster/issues
-// @downloadURL  https://raw.githubusercontent.com/codertesla/youtube-speed-booster/main/youtube-speed-booster.user.js
-// @updateURL    https://raw.githubusercontent.com/codertesla/youtube-speed-booster/main/youtube-speed-booster.user.js
+// @downloadURL  https://update.greasyfork.org/scripts/585659/code.user.js
+// @updateURL    https://update.greasyfork.org/scripts/585659/code.user.js
 // @match        https://www.youtube.com/*
 // @match        https://m.youtube.com/*
 // @match        https://www.youtube-nocookie.com/*
