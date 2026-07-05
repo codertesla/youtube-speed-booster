@@ -2,7 +2,7 @@
 // @name         YouTube 播放速度增强
 // @name:en      YouTube Speed Booster
 // @namespace    https://codex.local/userscripts
-// @version      1.3.2
+// @version      1.3.3
 // @description  解锁 YouTube 2.0x 倍速上限，并把脚本中设置的速度自动保存为所有视频的默认播放速度。
 // @description:en Unlock YouTube playback speeds above 2.0x and save one default speed for every video.
 // @author       codertesla
@@ -46,6 +46,7 @@
   let nativeControlObserver = null;
   let scanTimer = 0;
   let historyHooksInstalled = false;
+  let outsideClickInstalled = false;
 
   const clampRate = (value) => {
     const rate = Number(value);
@@ -103,6 +104,7 @@
     document.querySelectorAll('[data-ytsu-default-rate]').forEach((node) => {
       node.textContent = `Default ${formatRate(getDefaultRate())}`;
     });
+    if (speedPanel && !speedPanel.hidden) window.requestAnimationFrame(positionSpeedPanel);
   };
 
   const applyRate = (rate, options = {}) => {
@@ -213,6 +215,29 @@
     syncControls();
   };
 
+  const shouldUseNativePopover = () => window.matchMedia('(min-width: 641px)').matches;
+
+  const positionSpeedPanel = () => {
+    if (!speedPanel || !speedButton || speedPanel.hidden || !shouldUseNativePopover()) return;
+
+    const player = document.querySelector('.html5-video-player');
+    if (!player) return;
+
+    const playerRect = player.getBoundingClientRect();
+    const buttonRect = speedButton.getBoundingClientRect();
+    const panelRect = speedPanel.getBoundingClientRect();
+    const margin = 10;
+    const controlsGap = 10;
+    const width = panelRect.width || 320;
+    const height = panelRect.height || 210;
+    const rawLeft = buttonRect.left - playerRect.left + buttonRect.width / 2 - width / 2;
+    const left = Math.max(margin, Math.min(rawLeft, playerRect.width - width - margin));
+    const top = Math.max(margin, buttonRect.top - playerRect.top - height - controlsGap);
+
+    speedPanel.style.left = `${Math.round(left)}px`;
+    speedPanel.style.top = `${Math.round(top)}px`;
+  };
+
   const registerMenus = () => {
     GM_registerMenuCommand(`Set speed (current default: ${formatRate(getDefaultRate())})`, () => {
       const rate = askForRate('Speed for all YouTube videos:', getDefaultRate());
@@ -259,11 +284,10 @@
       }
       #yt-speed-unlocker-popover {
         position: absolute;
-        right: 12px;
-        bottom: 58px;
         z-index: 2147483647;
-        width: min(520px, calc(100% - 24px));
+        width: 320px;
         padding: 0;
+        transform-origin: 50% 100%;
       }
       #yt-speed-unlocker-popover[hidden],
       #yt-speed-unlocker-fallback[hidden] {
@@ -273,40 +297,40 @@
       #yt-speed-unlocker-fallback .yt-speed-header {
         display: flex;
         align-items: center;
-        gap: 12px;
-        height: 54px;
-        padding: 0 18px;
+        gap: 10px;
+        height: 44px;
+        padding: 0 12px;
         border-bottom: 1px solid rgba(255, 255, 255, 0.14);
       }
       #yt-speed-unlocker-popover .yt-speed-body,
       #yt-speed-unlocker-fallback .yt-speed-body {
-        padding: 18px;
+        padding: 14px;
       }
       #yt-speed-unlocker-popover .yt-speed-title,
       #yt-speed-unlocker-fallback .yt-speed-title {
         flex: 1;
         margin: 0;
-        font-size: 18px;
+        font-size: 15px;
         font-weight: 700;
       }
       #yt-speed-unlocker-popover .yt-speed-default-badge,
       #yt-speed-unlocker-fallback .yt-speed-default-badge {
         color: rgba(255, 255, 255, 0.76);
-        font-size: 14px;
+        font-size: 12px;
         font-weight: 500;
         white-space: nowrap;
       }
       #yt-speed-unlocker-popover .yt-speed-icon-button,
       #yt-speed-unlocker-fallback .yt-speed-icon-button {
-        width: 40px;
-        height: 40px;
+        width: 32px;
+        height: 32px;
         padding: 0;
         color: #fff;
         background: rgba(255, 255, 255, 0.08);
         border: 0;
         border-radius: 50%;
         cursor: pointer;
-        font: 400 28px/40px Arial, sans-serif;
+        font: 400 24px/32px Arial, sans-serif;
       }
       #yt-speed-unlocker-popover .yt-speed-icon-button:hover,
       #yt-speed-unlocker-fallback .yt-speed-icon-button:hover {
@@ -314,17 +338,17 @@
       }
       #yt-speed-unlocker-popover .yt-speed-rate,
       #yt-speed-unlocker-fallback .yt-speed-rate {
-        margin: 0 0 14px;
+        margin: 0 0 10px;
         text-align: center;
-        font-size: 30px;
+        font-size: 26px;
         font-weight: 700;
       }
       #yt-speed-unlocker-popover .yt-speed-slider-row,
       #yt-speed-unlocker-fallback .yt-speed-slider-row {
         display: grid;
-        grid-template-columns: 48px 1fr 48px;
+        grid-template-columns: 36px 1fr 36px;
         align-items: center;
-        gap: 14px;
+        gap: 10px;
       }
       #yt-speed-unlocker-popover input[type="range"],
       #yt-speed-unlocker-fallback input[type="range"] {
@@ -333,43 +357,43 @@
       }
       #yt-speed-unlocker-popover .yt-speed-step,
       #yt-speed-unlocker-fallback .yt-speed-step {
-        width: 48px;
-        height: 48px;
+        width: 36px;
+        height: 36px;
         padding: 0;
         color: #fff;
         background: rgba(255, 255, 255, 0.12);
         border: 0;
         border-radius: 50%;
         cursor: pointer;
-        font: 700 30px/48px Arial, sans-serif;
+        font: 700 24px/36px Arial, sans-serif;
       }
       #yt-speed-unlocker-popover .yt-speed-chip-row,
       #yt-speed-unlocker-fallback .yt-speed-chip-row {
         display: grid;
         grid-template-columns: repeat(5, minmax(0, 1fr));
-        gap: 10px;
-        margin: 18px 0 12px;
+        gap: 7px;
+        margin: 12px 0 10px;
       }
       #yt-speed-unlocker-popover .yt-speed-chip,
       #yt-speed-unlocker-fallback .yt-speed-chip {
-        min-height: 44px;
-        padding: 0 8px;
+        min-height: 34px;
+        padding: 0 6px;
         color: #fff;
         background: rgba(255, 255, 255, 0.1);
         border: 0;
-        border-radius: 22px;
+        border-radius: 17px;
         cursor: pointer;
-        font: 500 16px/1 Roboto, Arial, sans-serif;
+        font: 500 13px/1 Roboto, Arial, sans-serif;
       }
       #yt-speed-unlocker-popover input[type="number"],
       #yt-speed-unlocker-fallback input[type="number"] {
-        width: 88px;
-        padding: 8px 10px;
+        width: 76px;
+        padding: 6px 8px;
         color: #fff;
         background: rgba(255, 255, 255, 0.1);
         border: 1px solid rgba(255, 255, 255, 0.18);
-        border-radius: 12px;
-        font-size: 16px;
+        border-radius: 9px;
+        font-size: 13px;
       }
       #yt-speed-unlocker-popover .yt-speed-exact-row,
       #yt-speed-unlocker-fallback .yt-speed-exact-row {
@@ -378,6 +402,54 @@
         justify-content: space-between;
         gap: 12px;
         margin-top: 12px;
+      }
+      #yt-speed-unlocker-fallback .yt-speed-header {
+        height: 54px;
+        padding: 0 18px;
+        gap: 12px;
+      }
+      #yt-speed-unlocker-fallback .yt-speed-body {
+        padding: 18px;
+      }
+      #yt-speed-unlocker-fallback .yt-speed-title {
+        font-size: 18px;
+      }
+      #yt-speed-unlocker-fallback .yt-speed-default-badge {
+        font-size: 14px;
+      }
+      #yt-speed-unlocker-fallback .yt-speed-icon-button {
+        width: 40px;
+        height: 40px;
+        font: 400 28px/40px Arial, sans-serif;
+      }
+      #yt-speed-unlocker-fallback .yt-speed-rate {
+        margin: 0 0 14px;
+        font-size: 30px;
+      }
+      #yt-speed-unlocker-fallback .yt-speed-slider-row {
+        grid-template-columns: 48px 1fr 48px;
+        gap: 14px;
+      }
+      #yt-speed-unlocker-fallback .yt-speed-step {
+        width: 48px;
+        height: 48px;
+        font: 700 30px/48px Arial, sans-serif;
+      }
+      #yt-speed-unlocker-fallback .yt-speed-chip-row {
+        gap: 10px;
+        margin: 18px 0 12px;
+      }
+      #yt-speed-unlocker-fallback .yt-speed-chip {
+        min-height: 44px;
+        padding: 0 8px;
+        border-radius: 22px;
+        font: 500 16px/1 Roboto, Arial, sans-serif;
+      }
+      #yt-speed-unlocker-fallback input[type="number"] {
+        width: 88px;
+        padding: 8px 10px;
+        border-radius: 12px;
+        font-size: 16px;
       }
       #yt-speed-unlocker-fallback {
         position: absolute;
@@ -397,6 +469,8 @@
         #yt-speed-unlocker-popover,
         #yt-speed-unlocker-fallback {
           width: calc(100% - 14px);
+          left: 7px !important;
+          top: auto !important;
           bottom: 10px;
           border-radius: 16px;
         }
@@ -424,7 +498,7 @@
     const closeButton = document.createElement('button');
     closeButton.type = 'button';
     closeButton.className = 'yt-speed-icon-button';
-    closeButton.textContent = '‹';
+    closeButton.textContent = id === 'yt-speed-unlocker-popover' ? '×' : '‹';
     closeButton.title = 'Close speed panel';
     closeButton.addEventListener('click', () => {
       root.hidden = true;
@@ -540,8 +614,10 @@
       speedButton.addEventListener('click', (event) => {
         event.stopPropagation();
         if (!speedPanel) return;
-        speedPanel.hidden = !speedPanel.hidden;
+        const willShow = speedPanel.hidden;
+        speedPanel.hidden = !willShow;
         syncControls();
+        if (willShow) window.requestAnimationFrame(positionSpeedPanel);
       });
 
       const settingsButton = rightControls.querySelector('.ytp-settings-button');
@@ -552,11 +628,15 @@
       if (speedPanel && speedPanel.parentNode) speedPanel.parentNode.removeChild(speedPanel);
       speedPanel = createSpeedPanel('yt-speed-unlocker-popover');
       player.appendChild(speedPanel);
-      document.addEventListener('click', (event) => {
-        if (!speedPanel || speedPanel.hidden) return;
-        if (speedPanel.contains(event.target) || speedButton.contains(event.target)) return;
-        speedPanel.hidden = true;
-      }, true);
+      if (!outsideClickInstalled) {
+        outsideClickInstalled = true;
+        document.addEventListener('click', (event) => {
+          if (!speedPanel || speedPanel.hidden) return;
+          if (speedPanel.contains(event.target) || speedButton.contains(event.target)) return;
+          speedPanel.hidden = true;
+        }, true);
+        window.addEventListener('resize', () => window.requestAnimationFrame(positionSpeedPanel));
+      }
     }
 
     if (fallbackPanel) fallbackPanel.hidden = true;

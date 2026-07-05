@@ -1,7 +1,7 @@
 # YouTube 播放速度增强
 
 ![Userscript](https://img.shields.io/badge/userscript-Tampermonkey%20%2F%20Violentmonkey-00485b)
-![Version](https://img.shields.io/badge/version-1.3.2-blue)
+![Version](https://img.shields.io/badge/version-1.3.3-blue)
 ![YouTube](https://img.shields.io/badge/site-YouTube-red)
 ![License](https://img.shields.io/badge/license-MIT-green)
 [![Greasy Fork](https://img.shields.io/badge/Greasy%20Fork-install-670000)](https://greasyfork.org/scripts/585659)
@@ -15,7 +15,8 @@
 ## 功能
 
 - 优先在 YouTube 原生播放器控制栏中新增倍速按钮。
-- 如果 YouTube 当前页面结构不允许稳定注入原生按钮，则显示一个贴近 YouTube 速度面板风格的播放器内控制面板。
+- 桌面端点击原生控制栏倍速按钮后，会在按钮上方显示紧凑的速度面板。
+- 如果 YouTube 当前页面结构不允许稳定注入原生按钮，或在移动/窄屏场景下，则显示一个贴近 YouTube 速度面板风格的播放器内兜底面板。
 - 通过直接设置 `video.playbackRate`，绕过 YouTube UI 里常见的 2.0x 上限。
 - 支持 `0.1x` 到 `16x`，滑杆快速调节 `0.25x` 到 `5x`，数字输入可设置完整范围。
 - 只有一个默认倍速。用户通过脚本设置任意速度后，会立即应用到当前视频，并保存为所有后续视频的默认速度。
@@ -70,6 +71,13 @@ node --check youtube-speed-booster.user.js
 ```
 
 ## 版本记录
+
+### 1.3.3
+
+- 桌面端速度面板改为锚定播放器控制栏按钮的小型 popover。
+- 使用按钮和播放器的 `getBoundingClientRect()` 计算面板位置，避免固定在播放器角落。
+- 移动端和原生控制栏不可用时继续使用大面板兜底。
+- 保留防抖 `MutationObserver` 注入策略，不使用长期轮询。
 
 ### 1.3.2
 
