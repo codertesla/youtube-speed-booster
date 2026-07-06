@@ -1,7 +1,7 @@
 # YouTube 播放速度增强
 
 ![Userscript](https://img.shields.io/badge/userscript-Tampermonkey%20%2F%20Violentmonkey-00485b)
-![Version](https://img.shields.io/badge/version-1.3.4-blue)
+![Version](https://img.shields.io/badge/version-1.3.5-blue)
 ![YouTube](https://img.shields.io/badge/site-YouTube-red)
 ![License](https://img.shields.io/badge/license-MIT-green)
 [![Greasy Fork](https://img.shields.io/badge/Greasy%20Fork-install-670000)](https://greasyfork.org/scripts/585659)
@@ -36,6 +36,13 @@
 https://update.greasyfork.org/scripts/585659/code.user.js
 ```
 
+## 相关 YouTube 脚本
+
+| 脚本 | 说明 | 安装 |
+| --- | --- | --- |
+| YouTube 播放速度增强 | 解锁 YouTube 2.0x 倍速上限，并保存一个全局默认播放速度。 | [Greasy Fork](https://greasyfork.org/scripts/585659) |
+| YouTube 自动展开帖子与评论 | 自动展开 YouTube 帖子和评论区里的“了解详情 / Read more / Show more”。 | [Greasy Fork](https://greasyfork.org/scripts/585509) |
+
 ## 使用
 
 - 播放器右下角原生控制栏可能会出现一个倍速按钮，例如 `1.50x`。
@@ -45,7 +52,7 @@ https://update.greasyfork.org/scripts/585659/code.user.js
 - 拖动滑杆会立即改变当前视频倍速，并保存为默认倍速。
 - 点击 `1.0`、`1.25`、`1.5`、`2.0`、`3.0` 会立即改变当前视频倍速，并保存为默认倍速。
 - 数字输入框可以输入更高倍速，例如 `6`、`8`、`12`，最高 `16`。
-- 如果关闭了面板，可从脚本管理器菜单里选择 `Show/hide speed panel` 重新显示。
+- 如果关闭了面板，可从脚本管理器菜单里选择 `显示/隐藏倍速面板` 重新显示。
 
 ## 设计说明
 
@@ -71,6 +78,12 @@ node --check youtube-speed-booster.user.js
 ```
 
 ## 版本记录
+
+### 1.3.5
+
+- 脚本管理器菜单改为中文显示。
+- 移除英文脚本标题覆盖，确保脚本管理器默认显示中文标题。
+- README 增加相关 YouTube 脚本推荐。
 
 ### 1.3.4
 

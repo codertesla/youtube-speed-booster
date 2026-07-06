@@ -1,8 +1,7 @@
 // ==UserScript==
 // @name         YouTube 播放速度增强
-// @name:en      YouTube Speed Booster
 // @namespace    https://codex.local/userscripts
-// @version      1.3.4
+// @version      1.3.5
 // @description  解锁 YouTube 2.0x 倍速上限，并把脚本中设置的速度自动保存为所有视频的默认播放速度。
 // @description:en Unlock YouTube playback speeds above 2.0x and save one default speed for every video.
 // @author       codertesla
@@ -255,12 +254,12 @@
   };
 
   const registerMenus = () => {
-    GM_registerMenuCommand(`Set speed (current default: ${formatRate(getDefaultRate())})`, () => {
-      const rate = askForRate('Speed for all YouTube videos:', getDefaultRate());
+    GM_registerMenuCommand(`设置倍速（当前默认：${formatRate(getDefaultRate())}）`, () => {
+      const rate = askForRate('所有 YouTube 视频的倍速：', getDefaultRate());
       if (rate !== null) setSpeed(rate);
     });
 
-    GM_registerMenuCommand('Show/hide speed panel', () => {
+    GM_registerMenuCommand('显示/隐藏倍速面板', () => {
       const next = !getShowPanel();
       setShowPanel(next);
       if (fallbackPanel) fallbackPanel.hidden = !next;
