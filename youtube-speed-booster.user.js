@@ -2,7 +2,7 @@
 // @name         YouTube 播放速度增强
 // @name:en      YouTube Speed Booster
 // @namespace    https://codex.local/userscripts
-// @version      1.3.3
+// @version      1.3.4
 // @description  解锁 YouTube 2.0x 倍速上限，并把脚本中设置的速度自动保存为所有视频的默认播放速度。
 // @description:en Unlock YouTube playback speeds above 2.0x and save one default speed for every video.
 // @author       codertesla
@@ -151,6 +151,12 @@
   };
 
   const scanPage = () => {
+    if (!isVideoPage()) {
+      currentVideoKey = '';
+      removeInjectedControls();
+      return;
+    }
+
     attachToVideo();
     injectNativeButton();
     const nextKey = getVideoKey();
@@ -213,6 +219,16 @@
     setDefaultRate(nextRate);
     applyRate(nextRate);
     syncControls();
+  };
+
+  const hidePanels = () => {
+    if (speedPanel) speedPanel.hidden = true;
+    if (fallbackPanel) fallbackPanel.hidden = true;
+  };
+
+  const removeInjectedControls = () => {
+    hidePanels();
+    if (speedButton?.parentNode) speedButton.parentNode.removeChild(speedButton);
   };
 
   const shouldUseNativePopover = () => window.matchMedia('(min-width: 641px)').matches;
@@ -598,6 +614,10 @@
 
   const injectNativeButton = () => {
     if (!document.body) return false;
+    if (!isVideoPage()) {
+      removeInjectedControls();
+      return false;
+    }
     installStyles();
 
     const rightControls = document.querySelector('.ytp-right-controls, .ytp-chrome-controls .ytp-right-controls');
@@ -645,7 +665,10 @@
   };
 
   const installFallbackPanel = () => {
-    if (!document.body || !getShowPanel()) return;
+    if (!document.body || !getShowPanel() || !isVideoPage()) {
+      hidePanels();
+      return;
+    }
     installStyles();
     if (!fallbackPanel) fallbackPanel = createSpeedPanel('yt-speed-unlocker-fallback');
 

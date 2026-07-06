@@ -1,7 +1,7 @@
 # YouTube 播放速度增强
 
 ![Userscript](https://img.shields.io/badge/userscript-Tampermonkey%20%2F%20Violentmonkey-00485b)
-![Version](https://img.shields.io/badge/version-1.3.3-blue)
+![Version](https://img.shields.io/badge/version-1.3.4-blue)
 ![YouTube](https://img.shields.io/badge/site-YouTube-red)
 ![License](https://img.shields.io/badge/license-MIT-green)
 [![Greasy Fork](https://img.shields.io/badge/Greasy%20Fork-install-670000)](https://greasyfork.org/scripts/585659)
@@ -71,6 +71,12 @@ node --check youtube-speed-booster.user.js
 ```
 
 ## 版本记录
+
+### 1.3.4
+
+- 修复频道页、首页、搜索页等非播放页误显示速度面板的问题。
+- UI 注入现在严格限制在 `/watch`、`/shorts`、`/embed` 播放页。
+- 离开播放页时会主动隐藏面板并移除注入到播放器控制栏的倍速按钮。
 
 ### 1.3.3
 
