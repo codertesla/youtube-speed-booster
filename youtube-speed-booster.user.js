@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         YouTube 播放速度增强
 // @namespace    https://codex.local/userscripts
-// @version      1.3.5
+// @version      1.3.6
 // @description  解锁 YouTube 2.0x 倍速上限，并把脚本中设置的速度自动保存为所有视频的默认播放速度。
 // @description:en Unlock YouTube playback speeds above 2.0x and save one default speed for every video.
 // @author       codertesla
@@ -17,6 +17,7 @@
 // @grant        GM_getValue
 // @grant        GM_setValue
 // @grant        GM_registerMenuCommand
+// @grant        GM_unregisterMenuCommand
 // @run-at       document-idle
 // ==/UserScript==
 
@@ -46,6 +47,7 @@
   let scanTimer = 0;
   let historyHooksInstalled = false;
   let outsideClickInstalled = false;
+  let menuCommandIds = [];
 
   const clampRate = (value) => {
     const rate = Number(value);
@@ -55,6 +57,7 @@
 
   const formatRate = (rate) => `${clampRate(rate).toFixed(2)}x`;
   const getDefaultRate = () => clampRate(GM_getValue(STORAGE.defaultRate, DEFAULT_RATE));
+  const formatDefaultRateLabel = () => `当前默认：${formatRate(getDefaultRate())}`;
   const setDefaultRate = (rate) => GM_setValue(STORAGE.defaultRate, clampRate(rate));
   const getShowPanel = () => GM_getValue(STORAGE.showPanel, true);
   const setShowPanel = (enabled) => GM_setValue(STORAGE.showPanel, Boolean(enabled));
@@ -101,7 +104,7 @@
       if (document.activeElement !== node) node.value = String(rate);
     });
     document.querySelectorAll('[data-ytsu-default-rate]').forEach((node) => {
-      node.textContent = `Default ${formatRate(getDefaultRate())}`;
+      node.textContent = formatDefaultRateLabel();
     });
     if (speedPanel && !speedPanel.hidden) window.requestAnimationFrame(positionSpeedPanel);
   };
@@ -218,6 +221,7 @@
     setDefaultRate(nextRate);
     applyRate(nextRate);
     syncControls();
+    registerMenus();
   };
 
   const hidePanels = () => {
@@ -254,17 +258,27 @@
   };
 
   const registerMenus = () => {
-    GM_registerMenuCommand(`设置倍速（当前默认：${formatRate(getDefaultRate())}）`, () => {
+    const canRefreshMenus = typeof GM_unregisterMenuCommand === 'function';
+    if (canRefreshMenus) {
+      menuCommandIds.forEach((id) => GM_unregisterMenuCommand(id));
+      menuCommandIds = [];
+    } else if (menuCommandIds.length) {
+      return;
+    }
+
+    const setRateMenuId = GM_registerMenuCommand(`设置倍速（${formatDefaultRateLabel()}）`, () => {
       const rate = askForRate('所有 YouTube 视频的倍速：', getDefaultRate());
       if (rate !== null) setSpeed(rate);
     });
+    if (setRateMenuId !== undefined) menuCommandIds.push(setRateMenuId);
 
-    GM_registerMenuCommand('显示/隐藏倍速面板', () => {
+    const togglePanelMenuId = GM_registerMenuCommand('显示/隐藏倍速面板', () => {
       const next = !getShowPanel();
       setShowPanel(next);
       if (fallbackPanel) fallbackPanel.hidden = !next;
       if (next) installFallbackPanel();
     });
+    if (togglePanelMenuId !== undefined) menuCommandIds.push(togglePanelMenuId);
   };
 
   const installStyles = () => {
@@ -528,7 +542,7 @@
 
     const defaultBadge = document.createElement('div');
     defaultBadge.className = 'yt-speed-default-badge';
-    defaultBadge.textContent = `Default ${formatRate(getDefaultRate())}`;
+    defaultBadge.textContent = formatDefaultRateLabel();
     defaultBadge.dataset.ytsuDefaultRate = 'true';
     header.appendChild(defaultBadge);
 

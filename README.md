@@ -1,7 +1,7 @@
 # YouTube 播放速度增强
 
 ![Userscript](https://img.shields.io/badge/userscript-Tampermonkey%20%2F%20Violentmonkey-00485b)
-![Version](https://img.shields.io/badge/version-1.3.5-blue)
+![Version](https://img.shields.io/badge/version-1.3.6-blue)
 ![YouTube](https://img.shields.io/badge/site-YouTube-red)
 ![License](https://img.shields.io/badge/license-MIT-green)
 [![Greasy Fork](https://img.shields.io/badge/Greasy%20Fork-install-670000)](https://greasyfork.org/scripts/585659)
@@ -48,7 +48,7 @@ https://update.greasyfork.org/scripts/585659/code.user.js
 - 播放器右下角原生控制栏可能会出现一个倍速按钮，例如 `1.50x`。
 - 如果没有出现原生按钮，会在播放器底部显示速度面板。
 - 点击面板左上角返回按钮可关闭面板。
-- 标题栏右侧会显示当前默认速度，例如 `Default 1.50x`。
+- 标题栏右侧和脚本管理器菜单会显示一致的当前默认速度，例如 `当前默认：1.50x`。
 - 拖动滑杆会立即改变当前视频倍速，并保存为默认倍速。
 - 点击 `1.0`、`1.25`、`1.5`、`2.0`、`3.0` 会立即改变当前视频倍速，并保存为默认倍速。
 - 数字输入框可以输入更高倍速，例如 `6`、`8`、`12`，最高 `16`。
@@ -78,6 +78,11 @@ node --check youtube-speed-booster.user.js
 ```
 
 ## 版本记录
+
+### 1.3.6
+
+- 统一速度面板和脚本管理器菜单里的当前默认速度文案。
+- 默认倍速变化后刷新脚本管理器菜单，避免菜单显示旧速度。
 
 ### 1.3.5
 
