@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         YouTube 播放速度增强
 // @namespace    https://codex.local/userscripts
-// @version      1.3.7
+// @version      1.3.8
 // @description  解锁 YouTube 2.0x 倍速上限，并把脚本中设置的速度自动保存为所有视频的默认播放速度。
 // @description:en Unlock YouTube playback speeds above 2.0x and save one default speed for every video.
 // @author       codertesla
@@ -48,6 +48,7 @@
   let historyHooksInstalled = false;
   let outsideClickInstalled = false;
   let menuCommandIds = [];
+  let suppressOutsideCloseUntil = 0;
 
   const clampRate = (value) => {
     const rate = Number(value);
@@ -221,6 +222,10 @@
   const openSpeedPanel = () => {
     if (!isVideoPage()) return;
 
+    // Tampermonkey menu clicks often synthesize a document click right after the
+    // command runs; ignore outside-close briefly so the panel is not instantly hidden.
+    suppressOutsideCloseUntil = Date.now() + 500;
+
     setShowPanel(true);
     injectNativeButton();
 
@@ -228,6 +233,7 @@
       if (fallbackPanel) fallbackPanel.hidden = true;
       speedPanel.hidden = false;
       syncControls();
+      positionSpeedPanel();
       window.requestAnimationFrame(positionSpeedPanel);
       return;
     }
@@ -668,7 +674,9 @@
         outsideClickInstalled = true;
         document.addEventListener('click', (event) => {
           if (!speedPanel || speedPanel.hidden) return;
-          if (speedPanel.contains(event.target) || speedButton.contains(event.target)) return;
+          if (Date.now() < suppressOutsideCloseUntil) return;
+          if (speedPanel.contains(event.target)) return;
+          if (speedButton && speedButton.contains(event.target)) return;
           speedPanel.hidden = true;
         }, true);
         window.addEventListener('resize', () => window.requestAnimationFrame(positionSpeedPanel));

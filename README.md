@@ -1,7 +1,7 @@
 # YouTube 播放速度增强
 
 ![Userscript](https://img.shields.io/badge/userscript-Tampermonkey%20%2F%20Violentmonkey-00485b)
-![Version](https://img.shields.io/badge/version-1.3.7-blue)
+![Version](https://img.shields.io/badge/version-1.3.8-blue)
 ![YouTube](https://img.shields.io/badge/site-YouTube-red)
 ![License](https://img.shields.io/badge/license-MIT-green)
 [![Greasy Fork](https://img.shields.io/badge/Greasy%20Fork-install-670000)](https://greasyfork.org/scripts/585659)
@@ -79,6 +79,10 @@ node --check youtube-speed-booster.user.js
 ```
 
 ## 版本记录
+
+### 1.3.8
+
+- 修复从脚本管理器菜单打开倍速面板后，被菜单关闭时的页面点击立刻关掉的问题。
 
 ### 1.3.7
 
