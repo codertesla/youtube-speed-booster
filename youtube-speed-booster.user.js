@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         YouTube 播放速度增强
 // @namespace    https://codex.local/userscripts
-// @version      1.3.6
+// @version      1.3.7
 // @description  解锁 YouTube 2.0x 倍速上限，并把脚本中设置的速度自动保存为所有视频的默认播放速度。
 // @description:en Unlock YouTube playback speeds above 2.0x and save one default speed for every video.
 // @author       codertesla
@@ -205,17 +205,6 @@
     });
   };
 
-  const askForRate = (message, initialValue) => {
-    const input = window.prompt(message, String(initialValue));
-    if (input === null) return null;
-    const normalized = input.trim().replace(/x$/i, '');
-    if (!Number.isFinite(Number(normalized))) {
-      window.alert('Please enter a number, for example: 1.5, 2.75, 3, 4.');
-      return null;
-    }
-    return clampRate(normalized);
-  };
-
   const setSpeed = (rate) => {
     const nextRate = clampRate(rate);
     setDefaultRate(nextRate);
@@ -227,6 +216,23 @@
   const hidePanels = () => {
     if (speedPanel) speedPanel.hidden = true;
     if (fallbackPanel) fallbackPanel.hidden = true;
+  };
+
+  const openSpeedPanel = () => {
+    if (!isVideoPage()) return;
+
+    setShowPanel(true);
+    injectNativeButton();
+
+    if (speedPanel) {
+      if (fallbackPanel) fallbackPanel.hidden = true;
+      speedPanel.hidden = false;
+      syncControls();
+      window.requestAnimationFrame(positionSpeedPanel);
+      return;
+    }
+
+    installFallbackPanel();
   };
 
   const removeInjectedControls = () => {
@@ -267,18 +273,15 @@
     }
 
     const setRateMenuId = GM_registerMenuCommand(`设置倍速（${formatDefaultRateLabel()}）`, () => {
-      const rate = askForRate('所有 YouTube 视频的倍速：', getDefaultRate());
-      if (rate !== null) setSpeed(rate);
+      openSpeedPanel();
     });
     if (setRateMenuId !== undefined) menuCommandIds.push(setRateMenuId);
 
-    const togglePanelMenuId = GM_registerMenuCommand('显示/隐藏倍速面板', () => {
-      const next = !getShowPanel();
-      setShowPanel(next);
-      if (fallbackPanel) fallbackPanel.hidden = !next;
-      if (next) installFallbackPanel();
+    const disableSpeedMenuId = GM_registerMenuCommand('关闭倍速功能', () => {
+      setSpeed(1);
+      hidePanels();
     });
-    if (togglePanelMenuId !== undefined) menuCommandIds.push(togglePanelMenuId);
+    if (disableSpeedMenuId !== undefined) menuCommandIds.push(disableSpeedMenuId);
   };
 
   const installStyles = () => {

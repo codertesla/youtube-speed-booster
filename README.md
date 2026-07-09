@@ -1,7 +1,7 @@
 # YouTube 播放速度增强
 
 ![Userscript](https://img.shields.io/badge/userscript-Tampermonkey%20%2F%20Violentmonkey-00485b)
-![Version](https://img.shields.io/badge/version-1.3.6-blue)
+![Version](https://img.shields.io/badge/version-1.3.7-blue)
 ![YouTube](https://img.shields.io/badge/site-YouTube-red)
 ![License](https://img.shields.io/badge/license-MIT-green)
 [![Greasy Fork](https://img.shields.io/badge/Greasy%20Fork-install-670000)](https://greasyfork.org/scripts/585659)
@@ -52,7 +52,8 @@ https://update.greasyfork.org/scripts/585659/code.user.js
 - 拖动滑杆会立即改变当前视频倍速，并保存为默认倍速。
 - 点击 `1.0`、`1.25`、`1.5`、`2.0`、`3.0` 会立即改变当前视频倍速，并保存为默认倍速。
 - 数字输入框可以输入更高倍速，例如 `6`、`8`、`12`，最高 `16`。
-- 如果关闭了面板，可从脚本管理器菜单里选择 `显示/隐藏倍速面板` 重新显示。
+- 如果关闭了面板，可从脚本管理器菜单里选择 `设置倍速` 重新打开。
+- 脚本管理器菜单里的 `关闭倍速功能` 会把默认倍速和当前视频重置为 `1x`。
 
 ## 设计说明
 
@@ -78,6 +79,11 @@ node --check youtube-speed-booster.user.js
 ```
 
 ## 版本记录
+
+### 1.3.7
+
+- 脚本管理器菜单：`设置倍速` 改为直接打开倍速 UI 面板。
+- 第二个菜单改为 `关闭倍速功能`，将默认倍速和当前视频重置为 `1x`。
 
 ### 1.3.6
 
