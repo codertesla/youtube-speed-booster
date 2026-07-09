@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         YouTube 播放速度增强
 // @namespace    https://codex.local/userscripts
-// @version      1.5.0
+// @version      1.5.1
 // @description  解锁 YouTube 2.0x 倍速上限，并把脚本中设置的速度自动保存为所有视频的默认播放速度。
 // @description:en Unlock YouTube playback speeds above 2.0x and save one default speed for every video.
 // @author       codertesla
@@ -109,6 +109,21 @@
     if (speedPanel && !speedPanel.hidden) window.requestAnimationFrame(positionSpeedPanel);
   };
 
+  // Sync YouTube's native playback-speed UI with our script's rate.
+  // YouTube's player object exposes setPlaybackRate() which updates both the
+  // actual rate and the native settings-menu display.  We call it first so
+  // YouTube's UI picks up the change, then immediately override video.playbackRate
+  // in applyRate() to ensure our exact value wins (setPlaybackRate may round).
+  // Only attempted for rates ≤ 2x — YouTube doesn't support higher values and
+  // calling setPlaybackRate with an out-of-range value could trigger its
+  // built-in rate enforcement that resets the speed.
+  const syncYouTubeNativeRate = (rate) => {
+    if (rate > 2) return;
+    const ytPlayer = document.getElementById('movie_player');
+    if (!ytPlayer || typeof ytPlayer.setPlaybackRate !== 'function') return;
+    try { ytPlayer.setPlaybackRate(rate); } catch (e) { /* ignore */ }
+  };
+
   const applyRate = (rate, options = {}) => {
     const video = options.video || getVideo();
     if (!video) return false;
@@ -116,6 +131,9 @@
     const nextRate = clampRate(rate);
     activeVideo = video;
     internalRateChange = true;
+    // Sync YouTube's native UI first (may round/clamp video.playbackRate).
+    syncYouTubeNativeRate(nextRate);
+    // Then set our exact rate, overriding any rounding by setPlaybackRate.
     video.playbackRate = nextRate;
     video.defaultPlaybackRate = nextRate;
     window.setTimeout(() => {
