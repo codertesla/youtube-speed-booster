@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         YouTube 播放速度增强
 // @namespace    https://codex.local/userscripts
-// @version      1.3.9
+// @version      1.4.0
 // @description  解锁 YouTube 2.0x 倍速上限，并把脚本中设置的速度自动保存为所有视频的默认播放速度。
 // @description:en Unlock YouTube playback speeds above 2.0x and save one default speed for every video.
 // @author       codertesla
@@ -270,6 +270,8 @@
   const removeInjectedControls = () => {
     hidePanels();
     if (speedButton?.parentNode) speedButton.parentNode.removeChild(speedButton);
+    if (speedPanel?.parentNode) speedPanel.parentNode.removeChild(speedPanel);
+    speedPanel = null;
   };
 
   const shouldUseNativePopover = () => window.matchMedia('(min-width: 641px)').matches;
@@ -682,6 +684,8 @@
     const rightControls = document.querySelector('.ytp-right-controls, .ytp-chrome-controls .ytp-right-controls');
     const player = document.querySelector('.html5-video-player');
     if (!rightControls || !player) {
+      if (speedPanel && speedPanel.parentNode) speedPanel.parentNode.removeChild(speedPanel);
+      speedPanel = null;
       installFallbackPanel();
       return false;
     }
@@ -703,7 +707,7 @@
       rightControls.insertBefore(speedButton, settingsButton || rightControls.firstChild);
     }
 
-    if (!speedPanel || speedPanel.id !== 'yt-speed-unlocker-popover') {
+    if (!speedPanel || speedPanel.id !== 'yt-speed-unlocker-popover' || !player.contains(speedPanel)) {
       if (speedPanel && speedPanel.parentNode) speedPanel.parentNode.removeChild(speedPanel);
       speedPanel = createSpeedPanel('yt-speed-unlocker-popover');
       player.appendChild(speedPanel);
