@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         YouTube 播放速度增强
 // @namespace    https://codex.local/userscripts
-// @version      1.4.0
+// @version      1.4.1
 // @description  解锁 YouTube 2.0x 倍速上限，并把脚本中设置的速度自动保存为所有视频的默认播放速度。
 // @description:en Unlock YouTube playback speeds above 2.0x and save one default speed for every video.
 // @author       codertesla
@@ -248,22 +248,15 @@
     if (!isVideoPage()) return;
 
     // Menu managers often deliver a trailing page click after the command runs.
-    // Also, YouTube usually has controls autohidden when opening from the menu,
-    // so button-anchored popover coords can land outside the clipped player.
     beginOutsideCloseSuppression(1200);
 
     setShowPanel(true);
+    // Ensure the native button + styles exist, but keep the popover hidden.
+    // The menu always shows the fallback panel — it has CSS-based positioning
+    // and is always re-attached to the live DOM, so it is reliably visible.
+    // (The popover relies on JS positioning and can end up off-screen.)
     injectNativeButton();
-
-    if (speedPanel) {
-      if (fallbackPanel) fallbackPanel.hidden = true;
-      speedPanel.hidden = false;
-      syncControls();
-      positionSpeedPanel();
-      window.requestAnimationFrame(positionSpeedPanel);
-      return;
-    }
-
+    if (speedPanel) speedPanel.hidden = true;
     installFallbackPanel();
   };
 
@@ -361,6 +354,8 @@
       }
       #yt-speed-unlocker-popover {
         position: absolute;
+        right: 12px;
+        bottom: 58px;
         z-index: 2147483647;
         width: 320px;
         padding: 0;
@@ -699,8 +694,12 @@
         if (!speedPanel) return;
         const willShow = speedPanel.hidden;
         speedPanel.hidden = !willShow;
+        if (willShow && fallbackPanel) fallbackPanel.hidden = true;
         syncControls();
-        if (willShow) window.requestAnimationFrame(positionSpeedPanel);
+        if (willShow) {
+          positionSpeedPanel();
+          window.requestAnimationFrame(positionSpeedPanel);
+        }
       });
 
       const settingsButton = rightControls.querySelector('.ytp-settings-button');
@@ -739,6 +738,10 @@
     }
     installStyles();
     if (!fallbackPanel) fallbackPanel = createSpeedPanel('yt-speed-unlocker-fallback');
+
+    // The popover relies on JS positioning; always hide it when showing the
+    // CSS-positioned fallback so the two never overlap.
+    if (speedPanel) speedPanel.hidden = true;
 
     const player = document.querySelector('.html5-video-player');
     if (player) {
