@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         YouTube 播放速度增强
 // @namespace    https://codex.local/userscripts
-// @version      1.4.1
+// @version      1.5.0
 // @description  解锁 YouTube 2.0x 倍速上限，并把脚本中设置的速度自动保存为所有视频的默认播放速度。
 // @description:en Unlock YouTube playback speeds above 2.0x and save one default speed for every video.
 // @author       codertesla
@@ -48,8 +48,6 @@
   let historyHooksInstalled = false;
   let outsideClickInstalled = false;
   let menuCommandIds = [];
-  let suppressOutsideCloseUntil = 0;
-  let suppressOutsideCloseTimer = 0;
 
   const clampRate = (value) => {
     const rate = Number(value);
@@ -220,46 +218,6 @@
     if (fallbackPanel) fallbackPanel.hidden = true;
   };
 
-  const beginOutsideCloseSuppression = (ms = 1200) => {
-    suppressOutsideCloseUntil = Date.now() + ms;
-    if (suppressOutsideCloseTimer) window.clearTimeout(suppressOutsideCloseTimer);
-    suppressOutsideCloseTimer = window.setTimeout(() => {
-      suppressOutsideCloseTimer = 0;
-      suppressOutsideCloseUntil = 0;
-    }, ms);
-  };
-
-  const isSpeedButtonPositionable = () => {
-    if (!speedButton) return false;
-    const player = document.querySelector('.html5-video-player');
-    if (!player || player.classList.contains('ytp-autohide')) return false;
-
-    const buttonRect = speedButton.getBoundingClientRect();
-    const playerRect = player.getBoundingClientRect();
-    return buttonRect.width > 0
-      && buttonRect.height > 0
-      && buttonRect.bottom > playerRect.top + 8
-      && buttonRect.top < playerRect.bottom - 8
-      && buttonRect.right > playerRect.left + 8
-      && buttonRect.left < playerRect.right - 8;
-  };
-
-  const openSpeedPanel = () => {
-    if (!isVideoPage()) return;
-
-    // Menu managers often deliver a trailing page click after the command runs.
-    beginOutsideCloseSuppression(1200);
-
-    setShowPanel(true);
-    // Ensure the native button + styles exist, but keep the popover hidden.
-    // The menu always shows the fallback panel — it has CSS-based positioning
-    // and is always re-attached to the live DOM, so it is reliably visible.
-    // (The popover relies on JS positioning and can end up off-screen.)
-    injectNativeButton();
-    if (speedPanel) speedPanel.hidden = true;
-    installFallbackPanel();
-  };
-
   const removeInjectedControls = () => {
     hidePanels();
     if (speedButton?.parentNode) speedButton.parentNode.removeChild(speedButton);
@@ -270,32 +228,21 @@
   const shouldUseNativePopover = () => window.matchMedia('(min-width: 641px)').matches;
 
   const positionSpeedPanel = () => {
-    if (!speedPanel || speedPanel.hidden || !shouldUseNativePopover()) return;
+    if (!speedPanel || !speedButton || speedPanel.hidden || !shouldUseNativePopover()) return;
 
     const player = document.querySelector('.html5-video-player');
     if (!player) return;
 
     const playerRect = player.getBoundingClientRect();
+    const buttonRect = speedButton.getBoundingClientRect();
     const panelRect = speedPanel.getBoundingClientRect();
     const margin = 10;
     const controlsGap = 10;
-    const bottomSafe = 76;
     const width = panelRect.width || 320;
     const height = panelRect.height || 210;
-
-    let left;
-    let top;
-
-    if (isSpeedButtonPositionable()) {
-      const buttonRect = speedButton.getBoundingClientRect();
-      const rawLeft = buttonRect.left - playerRect.left + buttonRect.width / 2 - width / 2;
-      left = Math.max(margin, Math.min(rawLeft, playerRect.width - width - margin));
-      top = Math.max(margin, buttonRect.top - playerRect.top - height - controlsGap);
-    } else {
-      // Menu / autohide: keep the panel fully inside the player viewport.
-      left = Math.max(margin, Math.min((playerRect.width - width) / 2, playerRect.width - width - margin));
-      top = Math.max(margin, playerRect.height - height - bottomSafe);
-    }
+    const rawLeft = buttonRect.left - playerRect.left + buttonRect.width / 2 - width / 2;
+    const left = Math.max(margin, Math.min(rawLeft, playerRect.width - width - margin));
+    const top = Math.max(margin, buttonRect.top - playerRect.top - height - controlsGap);
 
     speedPanel.style.left = `${Math.round(left)}px`;
     speedPanel.style.top = `${Math.round(top)}px`;
@@ -311,7 +258,9 @@
     }
 
     const setRateMenuId = GM_registerMenuCommand(`设置倍速（${formatDefaultRateLabel()}）`, () => {
-      openSpeedPanel();
+      setShowPanel(true);
+      if (speedPanel) speedPanel.hidden = true;
+      installFallbackPanel();
     });
     if (setRateMenuId !== undefined) menuCommandIds.push(setRateMenuId);
 
@@ -712,16 +661,11 @@
       player.appendChild(speedPanel);
       if (!outsideClickInstalled) {
         outsideClickInstalled = true;
-        const maybeCloseFromOutside = (event) => {
+        document.addEventListener('click', (event) => {
           if (!speedPanel || speedPanel.hidden) return;
-          if (Date.now() < suppressOutsideCloseUntil) return;
-          if (speedPanel.contains(event.target)) return;
-          if (speedButton && speedButton.contains(event.target)) return;
+          if (speedPanel.contains(event.target) || speedButton.contains(event.target)) return;
           speedPanel.hidden = true;
-        };
-        document.addEventListener('pointerdown', maybeCloseFromOutside, true);
-        document.addEventListener('mousedown', maybeCloseFromOutside, true);
-        document.addEventListener('click', maybeCloseFromOutside, true);
+        }, true);
         window.addEventListener('resize', () => window.requestAnimationFrame(positionSpeedPanel));
       }
     }
@@ -739,8 +683,6 @@
     installStyles();
     if (!fallbackPanel) fallbackPanel = createSpeedPanel('yt-speed-unlocker-fallback');
 
-    // The popover relies on JS positioning; always hide it when showing the
-    // CSS-positioned fallback so the two never overlap.
     if (speedPanel) speedPanel.hidden = true;
 
     const player = document.querySelector('.html5-video-player');
