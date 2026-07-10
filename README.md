@@ -1,4 +1,4 @@
-# YouTube 播放速度增强
+# YouTube 播放速度增强脚本
 
 ![Userscript](https://img.shields.io/badge/userscript-Tampermonkey%20%2F%20Violentmonkey-00485b)
 ![Version](https://img.shields.io/badge/version-1.3.9-blue)
@@ -6,9 +6,7 @@
 ![License](https://img.shields.io/badge/license-MIT-green)
 [![Greasy Fork](https://img.shields.io/badge/Greasy%20Fork-install-670000)](https://greasyfork.org/scripts/585659)
 
-一个用于 YouTube 的 Tampermonkey / Violentmonkey 用户脚本。
-
-推荐仓库名：`youtube-speed-booster`
+一个用于 YouTube 的 Tampermonkey / Violentmonkey 用户脚本，用于增强原生的播放速度控制功能。
 
 安装地址：[Greasy Fork](https://greasyfork.org/scripts/585659)
 
